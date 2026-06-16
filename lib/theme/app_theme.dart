@@ -102,38 +102,41 @@ class CalcColors extends ThemeExtension<CalcColors> {
 class AppTheme {
   const AppTheme._();
 
-  static const Color _seed = Color(0xFF6C5CE7);
+  static const Color _seed = Color(0xFF3B6EF5);
 
+  // A restrained, mostly-monochrome palette with a single, flat accent — no
+  // bright gradients or colored glows — so the app reads as a precise tool
+  // rather than a toy.
   static const CalcColors _darkColors = CalcColors(
-    screenBackground: Color(0xFF0E0E14),
-    panelBackground: Color(0xFF16161F),
-    displayPrimary: Color(0xFFFFFFFF),
-    displaySecondary: Color(0xFF8A8A9B),
-    digitButton: Color(0xFF20202C),
-    digitForeground: Color(0xFFF4F4F8),
-    functionButton: Color(0xFF2C2C3A),
-    functionForeground: Color(0xFFB9A7FF),
-    accentStart: Color(0xFF7B6CF6),
-    accentEnd: Color(0xFF5A4BD6),
+    screenBackground: Color(0xFF0C0D10),
+    panelBackground: Color(0xFF0C0D10),
+    displayPrimary: Color(0xFFF7F8FA),
+    displaySecondary: Color(0xFF6B6F76),
+    digitButton: Color(0xFF1A1C20),
+    digitForeground: Color(0xFFF2F3F5),
+    functionButton: Color(0xFF26282E),
+    functionForeground: Color(0xFFC9CCD2),
+    accentStart: Color(0xFF3B6EF5),
+    accentEnd: Color(0xFF3B6EF5),
     accentForeground: Color(0xFFFFFFFF),
-    error: Color(0xFFFF6B6B),
-    shadow: Color(0x66000000),
+    error: Color(0xFFE5484D),
+    shadow: Color(0x33000000),
   );
 
   static const CalcColors _lightColors = CalcColors(
-    screenBackground: Color(0xFFF1F2F8),
-    panelBackground: Color(0xFFFFFFFF),
-    displayPrimary: Color(0xFF1A1A2E),
-    displaySecondary: Color(0xFF9A9AAE),
+    screenBackground: Color(0xFFF4F5F7),
+    panelBackground: Color(0xFFF4F5F7),
+    displayPrimary: Color(0xFF14161A),
+    displaySecondary: Color(0xFF8A8F98),
     digitButton: Color(0xFFFFFFFF),
-    digitForeground: Color(0xFF1A1A2E),
-    functionButton: Color(0xFFE7E7F2),
-    functionForeground: Color(0xFF6C5CE7),
-    accentStart: Color(0xFF7B6CF6),
-    accentEnd: Color(0xFF5A4BD6),
+    digitForeground: Color(0xFF14161A),
+    functionButton: Color(0xFFE6E8EC),
+    functionForeground: Color(0xFF40454D),
+    accentStart: Color(0xFF3B6EF5),
+    accentEnd: Color(0xFF3B6EF5),
     accentForeground: Color(0xFFFFFFFF),
-    error: Color(0xFFE53E3E),
-    shadow: Color(0x1A1A1A40),
+    error: Color(0xFFD92D2D),
+    shadow: Color(0x14000000),
   );
 
   static ThemeData dark() => _build(Brightness.dark, _darkColors);

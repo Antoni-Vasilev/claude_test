@@ -5,8 +5,8 @@ import '../theme/app_theme.dart';
 /// Visual styles a calculator key can take.
 enum CalcButtonStyle { digit, function, operator, equals }
 
-/// A tactile, animated calculator key. Scales down while pressed and renders a
-/// gradient fill for accent (operator/equals) keys.
+/// A flat, refined calculator key. Uses a solid fill, a subtle Material ripple
+/// and a gentle press-scale — no gradients or colored glows.
 class CalcButton extends StatefulWidget {
   const CalcButton({
     super.key,
@@ -45,8 +45,8 @@ class _CalcButtonState extends State<CalcButton> {
     final background = switch (widget.style) {
       CalcButtonStyle.digit => colors.digitButton,
       CalcButtonStyle.function => colors.functionButton,
-      CalcButtonStyle.operator => null,
-      CalcButtonStyle.equals => null,
+      CalcButtonStyle.operator => colors.accentStart,
+      CalcButtonStyle.equals => colors.accentStart,
     };
 
     final foreground = switch (widget.style) {
@@ -57,45 +57,47 @@ class _CalcButtonState extends State<CalcButton> {
     };
 
     return Padding(
-      padding: const EdgeInsets.all(6),
-      child: GestureDetector(
-        onTapDown: (_) => _setPressed(true),
-        onTapUp: (_) => _setPressed(false),
-        onTapCancel: () => _setPressed(false),
-        onTap: widget.onTap,
-        onLongPress: widget.onLongPress,
-        child: AnimatedScale(
-          scale: _pressed ? 0.93 : 1.0,
-          duration: const Duration(milliseconds: 90),
-          curve: Curves.easeOut,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 120),
-            decoration: BoxDecoration(
-              color: background,
-              gradient: isAccent ? colors.accentGradient : null,
-              borderRadius: BorderRadius.circular(22),
-              boxShadow: [
-                BoxShadow(
-                  color: isAccent
-                      ? colors.accentEnd.withValues(alpha: _pressed ? 0.15 : 0.35)
-                      : colors.shadow,
-                  blurRadius: _pressed ? 4 : 14,
-                  offset: Offset(0, _pressed ? 2 : 6),
-                ),
-              ],
-            ),
-            child: Center(
-              child: widget.icon != null
-                  ? Icon(widget.icon, color: foreground, size: 26)
-                  : Text(
-                      widget.label,
-                      style: TextStyle(
-                        color: foreground,
-                        fontSize: 28,
-                        fontWeight: FontWeight.w500,
-                        height: 1,
+      padding: const EdgeInsets.all(5),
+      child: AnimatedScale(
+        scale: _pressed ? 0.97 : 1.0,
+        duration: const Duration(milliseconds: 70),
+        curve: Curves.easeOut,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: colors.shadow,
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Material(
+            color: background,
+            borderRadius: BorderRadius.circular(18),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: widget.onTap,
+              onLongPress: widget.onLongPress,
+              onHighlightChanged: _setPressed,
+              splashColor: foreground.withValues(alpha: 0.10),
+              highlightColor: foreground.withValues(alpha: 0.06),
+              child: Center(
+                child: widget.icon != null
+                    ? Icon(widget.icon, color: foreground, size: 24)
+                    : Text(
+                        widget.label,
+                        style: TextStyle(
+                          color: foreground,
+                          fontSize: 26,
+                          fontWeight: isAccent
+                              ? FontWeight.w500
+                              : FontWeight.w400,
+                          height: 1,
+                        ),
                       ),
-                    ),
+              ),
             ),
           ),
         ),

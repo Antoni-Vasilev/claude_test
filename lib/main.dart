@@ -97,24 +97,14 @@ class _CalculatorPageState extends State<CalculatorPage> {
                       flex: 5,
                       child: CalculatorDisplay(controller: _controller),
                     ),
+                    Container(
+                      height: 1,
+                      margin: const EdgeInsets.symmetric(horizontal: 24),
+                      color: colors.displaySecondary.withValues(alpha: 0.12),
+                    ),
                     Expanded(
                       flex: 7,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: colors.panelBackground,
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(36),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: colors.shadow,
-                              blurRadius: 30,
-                              offset: const Offset(0, -8),
-                            ),
-                          ],
-                        ),
-                        child: CalculatorKeypad(onKey: _onKey),
-                      ),
+                      child: CalculatorKeypad(onKey: _onKey),
                     ),
                   ],
                 ),
@@ -146,19 +136,13 @@ class _Header extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(24, 12, 16, 0),
       child: Row(
         children: [
-          ShaderMask(
-            shaderCallback: (rect) => colors.accentGradient.createShader(rect),
-            child: const Icon(Icons.calculate_rounded,
-                color: Colors.white, size: 26),
-          ),
-          const SizedBox(width: 10),
           Text(
             'Calculator',
             style: TextStyle(
               color: colors.displayPrimary,
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.2,
+              fontSize: 19,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.2,
             ),
           ),
           const Spacer(),
