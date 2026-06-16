@@ -2,6 +2,15 @@ import 'package:flutter/foundation.dart';
 
 import 'calculator_engine.dart';
 
+/// A single completed calculation, kept for the history list.
+@immutable
+class HistoryEntry {
+  const HistoryEntry({required this.expression, required this.result});
+
+  final String expression;
+  final String result;
+}
+
 /// Holds the live state of the calculator and translates button presses into
 /// changes to the current expression and result. Extends [ChangeNotifier] so
 /// the UI can rebuild reactively whenever the state changes.
@@ -12,6 +21,7 @@ class CalculatorController extends ChangeNotifier {
   String _result = '0';
   bool _hasError = false;
   bool _justEvaluated = false;
+  final List<HistoryEntry> _history = <HistoryEntry>[];
 
   /// The expression as the user has typed it, using display symbols.
   String get expression => _expression;
@@ -21,6 +31,28 @@ class CalculatorController extends ChangeNotifier {
 
   /// Whether the last action produced an error.
   bool get hasError => _hasError;
+
+  /// Past calculations, most recent first.
+  List<HistoryEntry> get history => List.unmodifiable(_history);
+
+  /// Whether `=` was the most recent meaningful action.
+  bool get justEvaluated => _justEvaluated;
+
+  /// Clears the stored calculation history.
+  void clearHistory() {
+    if (_history.isEmpty) return;
+    _history.clear();
+    notifyListeners();
+  }
+
+  /// Restores a previous result into the current expression.
+  void recallResult(String value) {
+    _expression = value;
+    _justEvaluated = true;
+    _hasError = false;
+    _updatePreview();
+    notifyListeners();
+  }
 
   static const Set<String> _operators = {'+', '-', CalculatorEngine.times, CalculatorEngine.divide};
 
@@ -167,6 +199,16 @@ class CalculatorController extends ChangeNotifier {
     }
     try {
       final value = _engine.evaluateToString(_expression);
+      // Avoid recording a no-op like "5 =" that just echoes the input.
+      if (value != _expression) {
+        _history.insert(
+          0,
+          HistoryEntry(expression: _expression, result: value),
+        );
+        if (_history.length > 50) {
+          _history.removeRange(50, _history.length);
+        }
+      }
       _result = value;
       _hasError = false;
       _justEvaluated = true;
