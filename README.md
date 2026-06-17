@@ -15,13 +15,22 @@ A polished, fully functional calculator built with Flutter and Material 3.
 - Continue calculating from a previous result, or start fresh with a new digit
 - Friendly error messages for divide-by-zero and invalid expressions
 
-**Experience & design**
-- Light and dark themes with an animated one-tap toggle, driven by a custom
-  `ThemeExtension` so every color is defined in one place
+**Design**
+- Modern, minimalist aesthetic inspired by Xiaomi / MIUI: clean geometric keys,
+  generous whitespace and a single vivid orange accent over a neutral palette
+- A proper **design-token system** — spacing, radii, durations, the type scale,
+  overlay opacities and elevation all live in `theme/design_tokens.dart`, and
+  colours/shadows on the `CalcColors` theme extension. Components contain no
+  magic numbers
+- Clear visual hierarchy of actions: digits (neutral) → functions (secondary)
+  → operators (accent-tinted) → equals (solid accent, the primary action)
+- Consistent hover, focus and pressed states on every interactive element
+- Light and dark themes with an animated one-tap toggle; all colours lerp
+  smoothly between modes
+- Typographic hierarchy: large, bold result value; smaller, lighter labels for
+  the expression and history
 - Calculation history: past results scroll above the display and can be tapped
   to recall them; clear the list from the header
-- Tactile keypad with press-scale animation, gradient accent keys and soft
-  shadows
 - Animated result transitions and horizontally scrolling text so long numbers
   are never clipped
 - Responsive layout that caps its width on tablets and desktop
@@ -36,9 +45,10 @@ lib/
   calculator_engine.dart          # Pure expression evaluator (UI-independent)
   calculator_controller.dart      # Input/state + history (ChangeNotifier)
   theme/
+    design_tokens.dart            # Spacing, radii, durations, type scale, etc.
     app_theme.dart                # Light/dark ThemeData + CalcColors extension
   widgets/
-    calc_button.dart              # Animated, tactile calculator key
+    calc_button.dart              # Token-driven, stateful calculator key
     calculator_display.dart       # History list + expression + result
     calculator_keypad.dart        # Keypad grid layout
 test/
@@ -48,7 +58,8 @@ test/
 ```
 
 The calculation logic is deliberately separated from the UI so it can be unit
-tested in isolation and reused.
+tested in isolation and reused. The visual layer is built on a single source of
+design tokens so the whole look can be retuned from one place.
 
 ## Getting started
 

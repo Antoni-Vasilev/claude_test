@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../calculator_engine.dart';
+import '../theme/design_tokens.dart';
 import 'calc_button.dart';
 
 /// Internal description of one key in the keypad grid.
@@ -59,7 +60,12 @@ class CalculatorKeypad extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(10, 4, 10, 8),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.sm,
+        AppSpacing.xs,
+        AppSpacing.sm,
+        AppSpacing.sm,
+      ),
       child: Column(
         children: [
           for (final row in _layout)

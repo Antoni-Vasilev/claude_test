@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
+import '../theme/design_tokens.dart';
 
-/// Visual styles a calculator key can take.
+/// Visual styles a calculator key can take. The hierarchy is, from least to
+/// most emphasis: [digit] (neutral) → [function] (secondary) →
+/// [operator] (accent-tinted) → [equals] (solid accent, the primary action).
 enum CalcButtonStyle { digit, function, operator, equals }
 
-/// A flat, refined calculator key. Uses a solid fill, a subtle Material ripple
-/// and a gentle press-scale — no gradients or colored glows.
+/// A single calculator key.
+///
+/// Fully token-driven: colours come from [CalcColors], everything else (radius,
+/// spacing, type, motion, overlays) from the design tokens. Hover, pressed and
+/// the primary/secondary distinction are all expressed visually.
 class CalcButton extends StatefulWidget {
   const CalcButton({
     super.key,
@@ -31,71 +37,69 @@ class _CalcButtonState extends State<CalcButton> {
   bool _pressed = false;
 
   void _setPressed(bool value) {
-    if (_pressed != value) {
-      setState(() => _pressed = value);
-    }
+    if (_pressed != value) setState(() => _pressed = value);
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<CalcColors>()!;
-    final isAccent = widget.style == CalcButtonStyle.operator ||
-        widget.style == CalcButtonStyle.equals;
+    final isEquals = widget.style == CalcButtonStyle.equals;
 
     final background = switch (widget.style) {
-      CalcButtonStyle.digit => colors.digitButton,
-      CalcButtonStyle.function => colors.functionButton,
-      CalcButtonStyle.operator => colors.accentStart,
-      CalcButtonStyle.equals => colors.accentStart,
+      CalcButtonStyle.digit => colors.keyDigit,
+      CalcButtonStyle.function => colors.keyFunction,
+      CalcButtonStyle.operator => colors.keyOperator,
+      CalcButtonStyle.equals => _pressed ? colors.accentPressed : colors.accent,
     };
 
     final foreground = switch (widget.style) {
-      CalcButtonStyle.digit => colors.digitForeground,
-      CalcButtonStyle.function => colors.functionForeground,
-      CalcButtonStyle.operator => colors.accentForeground,
-      CalcButtonStyle.equals => colors.accentForeground,
+      CalcButtonStyle.digit => colors.keyDigitText,
+      CalcButtonStyle.function => colors.keyFunctionText,
+      CalcButtonStyle.operator => colors.keyOperatorText,
+      CalcButtonStyle.equals => colors.onAccent,
     };
 
+    final textStyle = switch (widget.style) {
+      CalcButtonStyle.digit => AppType.keyDigit,
+      CalcButtonStyle.function => AppType.keyFunction,
+      CalcButtonStyle.operator || CalcButtonStyle.equals => AppType.keyAccent,
+    };
+
+    final radius = BorderRadius.circular(AppRadius.lg);
+
     return Padding(
-      padding: const EdgeInsets.all(5),
+      padding: const EdgeInsets.all(AppSpacing.xs),
       child: AnimatedScale(
-        scale: _pressed ? 0.97 : 1.0,
-        duration: const Duration(milliseconds: 70),
+        scale: _pressed ? AppLayout.pressedScale : 1.0,
+        duration: AppDuration.instant,
         curve: Curves.easeOut,
-        child: DecoratedBox(
+        child: AnimatedContainer(
+          duration: AppDuration.fast,
+          curve: Curves.easeOut,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(
-                color: colors.shadow,
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            color: background,
+            borderRadius: radius,
+            boxShadow: colors.keyShadow,
           ),
           child: Material(
-            color: background,
-            borderRadius: BorderRadius.circular(18),
-            clipBehavior: Clip.antiAlias,
+            type: MaterialType.transparency,
             child: InkWell(
+              borderRadius: radius,
               onTap: widget.onTap,
               onLongPress: widget.onLongPress,
               onHighlightChanged: _setPressed,
-              splashColor: foreground.withValues(alpha: 0.10),
-              highlightColor: foreground.withValues(alpha: 0.06),
+              hoverColor: foreground.withValues(alpha: AppOverlay.hover),
+              focusColor: foreground.withValues(alpha: AppOverlay.focus),
+              splashColor: foreground.withValues(alpha: AppOverlay.pressed),
+              highlightColor: foreground.withValues(alpha: AppOverlay.hover),
               child: Center(
                 child: widget.icon != null
-                    ? Icon(widget.icon, color: foreground, size: 24)
+                    ? Icon(widget.icon, color: foreground, size: AppSpacing.xxl)
                     : Text(
                         widget.label,
-                        style: TextStyle(
-                          color: foreground,
-                          fontSize: 26,
-                          fontWeight: isAccent
-                              ? FontWeight.w500
-                              : FontWeight.w400,
-                          height: 1,
-                        ),
+                        textAlign: TextAlign.center,
+                        style: textStyle.copyWith(color: foreground),
+                        semanticsLabel: _semanticsFor(widget.label, isEquals),
                       ),
               ),
             ),
@@ -103,5 +107,17 @@ class _CalcButtonState extends State<CalcButton> {
         ),
       ),
     );
+  }
+
+  String? _semanticsFor(String label, bool isEquals) {
+    if (isEquals) return 'equals';
+    return switch (label) {
+      '×' => 'multiply',
+      '÷' => 'divide',
+      '+/-' => 'toggle sign',
+      '%' => 'percent',
+      'AC' => 'all clear',
+      _ => null,
+    };
   }
 }

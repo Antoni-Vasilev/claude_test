@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../calculator_controller.dart';
 import '../theme/app_theme.dart';
+import '../theme/design_tokens.dart';
 
 /// The upper portion of the calculator: a scrollable history list above the
-/// live expression and a large, animated result.
+/// live expression and a large, animated result. Typography and spacing are
+/// driven entirely by the design tokens.
 class CalculatorDisplay extends StatelessWidget {
   const CalculatorDisplay({super.key, required this.controller});
 
@@ -17,10 +19,14 @@ class CalculatorDisplay extends StatelessWidget {
     return AnimatedBuilder(
       animation: controller,
       builder: (context, _) {
-        final expression =
-            controller.expression.isEmpty ? '' : controller.expression;
+        final expression = controller.expression;
         return Padding(
-          padding: const EdgeInsets.fromLTRB(24, 8, 24, 12),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.xxl,
+            AppSpacing.sm,
+            AppSpacing.xxl,
+            AppSpacing.md,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -31,24 +37,22 @@ class CalculatorDisplay extends StatelessWidget {
                   onRecall: controller.recallResult,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               _AutoScrollText(
                 text: expression,
-                style: TextStyle(
-                  color: colors.displaySecondary,
-                  fontSize: 26,
-                  fontWeight: FontWeight.w400,
-                ),
+                style: AppType.expression.copyWith(color: colors.textSecondary),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               AnimatedSwitcher(
-                duration: const Duration(milliseconds: 220),
+                duration: AppDuration.medium,
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeIn,
                 transitionBuilder: (child, animation) {
                   return FadeTransition(
                     opacity: animation,
                     child: SlideTransition(
                       position: Tween<Offset>(
-                        begin: const Offset(0, 0.18),
+                        begin: const Offset(0, 0.16),
                         end: Offset.zero,
                       ).animate(animation),
                       child: child,
@@ -58,14 +62,13 @@ class CalculatorDisplay extends StatelessWidget {
                 child: _AutoScrollText(
                   key: ValueKey('${controller.result}-${controller.hasError}'),
                   text: controller.result,
-                  alignment: Alignment.centerRight,
-                  style: TextStyle(
+                  style: (controller.hasError
+                          ? AppType.displayError
+                          : AppType.displayValue)
+                      .copyWith(
                     color: controller.hasError
                         ? colors.error
-                        : colors.displayPrimary,
-                    fontSize: controller.hasError ? 34 : 64,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -1,
+                        : colors.textPrimary,
                   ),
                 ),
               ),
@@ -78,18 +81,16 @@ class CalculatorDisplay extends StatelessWidget {
 }
 
 /// Right-aligned text that scrolls horizontally when it overflows, so long
-/// numbers never get clipped.
+/// numbers are never clipped.
 class _AutoScrollText extends StatelessWidget {
   const _AutoScrollText({
     super.key,
     required this.text,
     required this.style,
-    this.alignment = Alignment.centerRight,
   });
 
   final String text;
   final TextStyle style;
-  final Alignment alignment;
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +101,7 @@ class _AutoScrollText extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         child: Align(
-          alignment: alignment,
+          alignment: Alignment.centerRight,
           child: Text(text, style: style, maxLines: 1),
         ),
       ),
@@ -108,6 +109,8 @@ class _AutoScrollText extends StatelessWidget {
   }
 }
 
+/// A faded, scrollable list of past calculations. Each row can be tapped to
+/// recall its result.
 class _History extends StatelessWidget {
   const _History({
     required this.entries,
@@ -130,7 +133,7 @@ class _History extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [Colors.transparent, Colors.black, Colors.black],
-          stops: [0.0, 0.25, 1.0],
+          stops: [0.0, 0.28, 1.0],
         ).createShader(rect);
       },
       blendMode: BlendMode.dstIn,
@@ -143,10 +146,15 @@ class _History extends StatelessWidget {
           return Align(
             alignment: Alignment.centerRight,
             child: InkWell(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
+              hoverColor: colors.accent.withValues(alpha: AppOverlay.hover),
+              splashColor: colors.accent.withValues(alpha: AppOverlay.pressed),
               onTap: () => onRecall(entry.result),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                padding: const EdgeInsets.symmetric(
+                  vertical: AppSpacing.xs,
+                  horizontal: AppSpacing.sm,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   mainAxisSize: MainAxisSize.min,
@@ -155,20 +163,15 @@ class _History extends StatelessWidget {
                       entry.expression,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: colors.displaySecondary.withValues(alpha: 0.7),
-                        fontSize: 15,
-                      ),
+                      style: AppType.historyExpression
+                          .copyWith(color: colors.textTertiary),
                     ),
                     Text(
                       '= ${entry.result}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: colors.displaySecondary,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: AppType.historyResult
+                          .copyWith(color: colors.textSecondary),
                     ),
                   ],
                 ),

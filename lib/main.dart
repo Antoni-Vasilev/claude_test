@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'calculator_controller.dart';
 import 'theme/app_theme.dart';
+import 'theme/design_tokens.dart';
 import 'widgets/calculator_display.dart';
 import 'widgets/calculator_keypad.dart';
 
@@ -77,47 +78,45 @@ class _CalculatorPageState extends State<CalculatorPage> {
 
     return Scaffold(
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            // Center and cap the width so the layout also looks intentional on
-            // tablets and desktop windows.
-            final maxWidth =
-                constraints.maxWidth > 520 ? 480.0 : constraints.maxWidth;
-            return Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: maxWidth),
-                child: Column(
-                  children: [
-                    _Header(
-                      isDark: widget.isDark,
-                      onToggleTheme: widget.onToggleTheme,
-                      onClearHistory: _controller.clearHistory,
-                    ),
-                    Expanded(
-                      flex: 5,
-                      child: CalculatorDisplay(controller: _controller),
-                    ),
-                    Container(
-                      height: 1,
-                      margin: const EdgeInsets.symmetric(horizontal: 24),
-                      color: colors.displaySecondary.withValues(alpha: 0.12),
-                    ),
-                    Expanded(
-                      flex: 7,
-                      child: CalculatorKeypad(onKey: _onKey),
-                    ),
-                  ],
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: AppLayout.maxContentWidth,
+            ),
+            child: Column(
+              children: [
+                _Header(
+                  isDark: widget.isDark,
+                  onToggleTheme: widget.onToggleTheme,
+                  onClearHistory: _controller.clearHistory,
                 ),
-              ),
-            );
-          },
+                Expanded(
+                  flex: 5,
+                  child: CalculatorDisplay(controller: _controller),
+                ),
+                Container(
+                  height: AppLayout.hairline,
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.xxl,
+                    vertical: AppSpacing.xs,
+                  ),
+                  color: colors.border,
+                ),
+                Expanded(
+                  flex: 7,
+                  child: CalculatorKeypad(onKey: _onKey),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 }
 
-/// Slim top bar with the app title, a history-clear action and a theme toggle.
+/// Slim top bar (navigation) with the app title, a history-clear action and an
+/// animated theme toggle. Controls share one consistent, token-driven style.
 class _Header extends StatelessWidget {
   const _Header({
     required this.isDark,
@@ -133,39 +132,86 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<CalcColors>()!;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 12, 16, 0),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.xxl,
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.xs,
+      ),
       child: Row(
         children: [
-          Text(
-            'Calculator',
-            style: TextStyle(
-              color: colors.displayPrimary,
-              fontSize: 19,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.2,
+          Container(
+            width: AppSpacing.sm,
+            height: AppType.title.fontSize,
+            decoration: BoxDecoration(
+              color: colors.accent,
+              borderRadius: BorderRadius.circular(AppRadius.pill),
             ),
           ),
-          const Spacer(),
-          IconButton(
-            tooltip: 'Clear history',
-            onPressed: onClearHistory,
-            icon: Icon(Icons.history_rounded, color: colors.displaySecondary),
+          const SizedBox(width: AppSpacing.md),
+          Text(
+            'Calculator',
+            style: AppType.title.copyWith(color: colors.textPrimary),
           ),
-          IconButton(
+          const Spacer(),
+          _NavButton(
+            tooltip: 'Clear history',
+            icon: const Icon(Icons.history_rounded),
+            color: colors.textSecondary,
+            accent: colors.accent,
+            onPressed: onClearHistory,
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          _NavButton(
             tooltip: isDark ? 'Light mode' : 'Dark mode',
+            color: colors.textSecondary,
+            accent: colors.accent,
             onPressed: onToggleTheme,
             icon: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 250),
+              duration: AppDuration.slow,
               transitionBuilder: (child, animation) =>
                   RotationTransition(turns: animation, child: child),
               child: Icon(
                 isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
                 key: ValueKey(isDark),
-                color: colors.functionForeground,
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Consistent icon control for the header with clear hover / pressed states.
+class _NavButton extends StatelessWidget {
+  const _NavButton({
+    required this.tooltip,
+    required this.icon,
+    required this.color,
+    required this.accent,
+    required this.onPressed,
+  });
+
+  final String tooltip;
+  final Widget icon;
+  final Color color;
+  final Color accent;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: tooltip,
+      onPressed: onPressed,
+      icon: icon,
+      style: IconButton.styleFrom(
+        foregroundColor: color,
+        hoverColor: accent.withValues(alpha: AppOverlay.hover),
+        highlightColor: accent.withValues(alpha: AppOverlay.pressed),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.md),
+        ),
       ),
     );
   }
